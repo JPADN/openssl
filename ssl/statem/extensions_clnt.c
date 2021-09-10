@@ -633,6 +633,23 @@ static int add_key_share(SSL *s, WPACKET *pkt, unsigned int curve_id)
         }
         oqs_encodedlen = s->s3->tmp.oqs_kem->length_public_key;
 
+        /* -------------------------------- Modified -------------------------------- */
+
+        unsigned char *secret_key_ = s->s3->tmp.oqs_kem_client;
+
+        printf("\nClient Public Key:\n");
+        for (size_t i = 0; i < s->s3->tmp.oqs_kem->length_public_key; i++) {
+          printf("%02x", oqs_encoded_point[i]);
+        }
+        printf("\n");
+
+        printf("\nClient Secret Key:\n");
+        for (size_t i = 0; i < s->s3->tmp.oqs_kem->length_secret_key; i++) {
+          printf("%02x", secret_key_[i]);
+        }
+        printf("\n");
+        /* ----------------------------------- End ---------------------------------- */
+
       oqs_cleanup:
         if (has_error) {
           if (s->s3->tmp.oqs_kem_client) OQS_MEM_secure_free(s->s3->tmp.oqs_kem_client, s->s3->tmp.oqs_kem->length_secret_key);
@@ -1999,6 +2016,16 @@ int tls_parse_stoc_key_share(SSL *s, PACKET *pkt, unsigned int context, X509 *x,
           has_error = 1;
           goto oqs_cleanup;
         }
+
+        /* -------------------------------- Modified -------------------------------- */
+        
+        printf("Client Shared Secret:");
+        for (size_t j = 0; j < s->s3->tmp.oqs_kem->length_shared_secret; j++) {
+          printf("%02x", oqs_shared_secret[j]);
+        }
+        printf("\n");
+        /* ----------------------------------- End ---------------------------------- */
+
         oqs_shared_secret_len = s->s3->tmp.oqs_kem->length_shared_secret;
         /* We save the group_id so it can be printed out later in s_client's output. */
         s->s3->tmp.oqs_kem_curve_id = group_id;
